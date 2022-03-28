@@ -49,8 +49,6 @@ class MainAdapter(
                 itemView.findViewById<TextView>(R.id.header_textview_recycler_item).text = data.text
                 itemView.findViewById<TextView>(R.id.transcription_textview_recycler_item).text =
                     context.getString(R.string.translation, data.meanings?.get(0)?.transcription)
-
-
                 itemView.setOnClickListener { openInNewWindow(data) }
             }
         }
