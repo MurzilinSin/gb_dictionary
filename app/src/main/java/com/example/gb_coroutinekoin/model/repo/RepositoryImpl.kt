@@ -2,7 +2,6 @@ package com.example.gb_coroutinekoin.model.repo
 
 import com.example.gb_coroutinekoin.model.data.DataModel
 import com.example.gb_coroutinekoin.model.datasource.DataSource
-import com.example.gb_coroutinekoin.model.repo.Repository
 import io.reactivex.Observable
 
 class RepositoryImpl(private val dataSource: DataSource<List<DataModel>>) :
