@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.gb_coroutinekoin.R
 import com.example.gb_coroutinekoin.databinding.ActivityMainBinding
@@ -14,17 +13,16 @@ import com.example.gb_coroutinekoin.view.base.BaseActivity
 import com.example.gb_coroutinekoin.view.main.adapter.MainAdapter
 import com.example.gb_coroutinekoin.view.search.SearchDialogFragment
 import com.example.gb_coroutinekoin.viewmodels.MainActivityViewModel
-import dagger.android.AndroidInjection
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
+
 
 class MainActivity : BaseActivity<AppState>() {
 
     private lateinit var vb: ActivityMainBinding
     private var adapter: MainAdapter? = null
 
-    @Inject
-    internal lateinit var viewModelFactory: ViewModelProvider.Factory
-    override lateinit var viewModel: MainActivityViewModel
+
+    override val viewModel: MainActivityViewModel by inject()
 
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
@@ -37,7 +35,6 @@ class MainActivity : BaseActivity<AppState>() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         vb = ActivityMainBinding.inflate(layoutInflater)
         setContentView(vb.root)
@@ -52,7 +49,6 @@ class MainActivity : BaseActivity<AppState>() {
             )
             searchDialogFragment.show(supportFragmentManager, BOTTOM_SHEET_FRAGMENT_DIALOG_TAG)
         }
-        viewModel = viewModelFactory.create(MainActivityViewModel::class.java)
         viewModel.subscribe().observe(this@MainActivity) {
             renderData(it)
         }
