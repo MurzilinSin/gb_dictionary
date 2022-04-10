@@ -5,20 +5,25 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.gb_coroutinekoin.view.main.adapter.MainAdapter
 import com.example.gb_coroutinekoin.R
-import com.example.gb_coroutinekoin.view.search.SearchDialogFragment
 import com.example.gb_coroutinekoin.databinding.ActivityMainBinding
 import com.example.gb_coroutinekoin.model.data.AppState
 import com.example.gb_coroutinekoin.model.data.DataModel
-import com.example.gb_coroutinekoin.presenter.Presenter
 import com.example.gb_coroutinekoin.view.base.BaseActivity
-import com.example.gb_coroutinekoin.view.base.View
+import com.example.gb_coroutinekoin.view.main.adapter.MainAdapter
+import com.example.gb_coroutinekoin.view.search.SearchDialogFragment
+import com.example.gb_coroutinekoin.viewmodels.MainActivityViewModel
+import org.koin.android.ext.android.inject
+
 
 class MainActivity : BaseActivity<AppState>() {
 
     private lateinit var vb: ActivityMainBinding
     private var adapter: MainAdapter? = null
+
+
+    override val viewModel: MainActivityViewModel by inject()
+
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
             override fun onItemClick(data: DataModel) {
@@ -38,16 +43,16 @@ class MainActivity : BaseActivity<AppState>() {
             searchDialogFragment.setOnSearchClickListener(
                 object : SearchDialogFragment.OnSearchClickListener {
                     override fun onClick(searchWord: String) {
-                        presenter.getData(word = searchWord)
+                        viewModel.getData(word = searchWord)
                     }
                 }
             )
             searchDialogFragment.show(supportFragmentManager, BOTTOM_SHEET_FRAGMENT_DIALOG_TAG)
         }
-    }
+        viewModel.subscribe().observe(this@MainActivity) {
+            renderData(it)
+        }
 
-    override fun createPresenter(): Presenter<AppState, View> {
-        return MainPresenter()
     }
 
     override fun renderData(appState: AppState) {
@@ -89,7 +94,7 @@ class MainActivity : BaseActivity<AppState>() {
     private fun showErrorScreen(message: String?) {
         showViewError()
         vb.errorTextview.text = message ?: getString(R.string.undefined_error)
-        vb.reloadButton.setOnClickListener { presenter.getData("Error") }
+        vb.reloadButton.setOnClickListener { viewModel.getData("Error") }
     }
 
     private fun showViewSuccess() {

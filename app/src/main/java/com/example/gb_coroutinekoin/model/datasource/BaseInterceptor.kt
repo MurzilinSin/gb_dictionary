@@ -36,5 +36,4 @@ class BaseInterceptor private constructor() : Interceptor{
         val interceptor: BaseInterceptor
             get() = BaseInterceptor()
     }
-
 }
