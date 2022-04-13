@@ -1,8 +1,8 @@
-package com.example.gb_coroutinekoin.model.datasource
+package com.example.gb_coroutinekoin.model.repo
 
 import com.example.gb_coroutinekoin.model.data.AppState
 
-interface DataSourceLocal<T> : DataSource<T> {
+interface RepositoryLocal<T> : Repository<T> {
 
     suspend fun saveToDb(appState: AppState)
 }

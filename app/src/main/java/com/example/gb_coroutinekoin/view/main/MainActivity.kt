@@ -1,31 +1,42 @@
 package com.example.gb_coroutinekoin.view.main
 
+import android.content.Intent
 import android.os.Bundle
-import android.view.View.GONE
-import android.view.View.VISIBLE
-import androidx.recyclerview.widget.LinearLayoutManager
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import com.example.gb_coroutinekoin.R
 import com.example.gb_coroutinekoin.databinding.ActivityMainBinding
 import com.example.gb_coroutinekoin.model.data.AppState
 import com.example.gb_coroutinekoin.model.data.DataModel
-import com.example.gb_coroutinekoin.model.data.Meanings
+import com.example.gb_coroutinekoin.util.convertMeaningsToString
+import com.example.gb_coroutinekoin.util.isOnline
 import com.example.gb_coroutinekoin.view.base.BaseActivity
 import com.example.gb_coroutinekoin.view.description.DescriptionActivity
+import com.example.gb_coroutinekoin.view.history.HistoryActivity
 import com.example.gb_coroutinekoin.view.main.adapter.MainAdapter
 import com.example.gb_coroutinekoin.view.search.SearchDialogFragment
 import com.example.gb_coroutinekoin.viewmodels.MainViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainActivity : BaseActivity<AppState>() {
 
-    private lateinit var vb: ActivityMainBinding
-    private var adapter: MainAdapter? = null
-    private val viewModel: MainViewModel by inject()
+private const val BOTTOM_SHEET_FRAGMENT_DIALOG_TAG = "74a54328-5d62-46bf-ab6b-cbf5fgt0-092395"
 
+class MainActivity : BaseActivity<AppState, MainInteractor>() {
+
+    private lateinit var binding: ActivityMainBinding
+    private val viewModel: MainViewModel by viewModel()
+    private val adapter: MainAdapter by lazy { MainAdapter(onListItemClickListener) }
+    private val fabClickListener: View.OnClickListener =
+        View.OnClickListener {
+            val searchDialogFragment = SearchDialogFragment.newInstance()
+            searchDialogFragment.setOnSearchClickListener(onSearchClickListener)
+            searchDialogFragment.show(supportFragmentManager, BOTTOM_SHEET_FRAGMENT_DIALOG_TAG)
+        }
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
             override fun onItemClick(data: DataModel) {
@@ -39,108 +50,52 @@ class MainActivity : BaseActivity<AppState>() {
                 )
             }
         }
+    private val onSearchClickListener: SearchDialogFragment.OnSearchClickListener =
+        object : SearchDialogFragment.OnSearchClickListener {
+            override fun onClick(searchWord: String) {
+                isNetworkAvailable = isOnline(applicationContext)
+                if (isNetworkAvailable) {
+                    viewModel.getData(searchWord, isNetworkAvailable)
+                } else {
+                    showNoInternetConnectionDialog()
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        vb = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(vb.root)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        vb.searchFab.setOnClickListener {
-            val searchDialogFragment = SearchDialogFragment.newInstance()
-            searchDialogFragment.setOnSearchClickListener(
-                object : SearchDialogFragment.OnSearchClickListener {
-                    override fun onClick(searchWord: String) {
-                        viewModel.getData(wordToSearch = searchWord)
-                    }
-                }
-            )
-            searchDialogFragment.show(supportFragmentManager, BOTTOM_SHEET_FRAGMENT_DIALOG_TAG)
-        }
         CoroutineScope(Dispatchers.Main).launch {
-            viewModel.state.collect { appState ->
-                appState?.let {
-                    renderData(it)
-                }
+            viewModel.state.collectLatest {
+                it?.let { state -> renderData(state) }
             }
+        }
+        initViews()
+    }
+
+    override fun setDataToAdapter(data: List<DataModel>) {
+        adapter.setData(data)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.history_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_history -> {
+                startActivity(Intent(this, HistoryActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
-    override fun renderData(appState: AppState) {
-        when (appState) {
-            is AppState.Success -> {
-                val dataModel = appState.data
-                if (dataModel == null || dataModel.isEmpty()) {
-                    showErrorScreen(getString(R.string.empty_server_response_on_success))
-                } else {
-                    showViewSuccess()
-                    if (adapter == null) {
-                        vb.mainActivityRecyclerview.layoutManager =
-                            LinearLayoutManager(applicationContext)
-                        vb.mainActivityRecyclerview.adapter =
-                            MainAdapter(onListItemClickListener, dataModel, this)
-                    } else {
-                        adapter!!.setData(dataModel)
-                    }
-                }
-            }
-            is AppState.Loading -> {
-                showViewLoading()
-                if (appState.progress != null) {
-                    vb.progressBarHorizontal.visibility = VISIBLE
-                    vb.progressBarRound.visibility = GONE
-                    vb.progressBarHorizontal.progress = appState.progress
-                } else {
-                    vb.progressBarHorizontal.visibility = GONE
-                    vb.progressBarRound.visibility = VISIBLE
-                }
-            }
-            is AppState.Error -> {
-                showErrorScreen(appState.error.message)
-            }
-        }
-
+    private fun initViews() {
+        binding.searchFab.setOnClickListener(fabClickListener)
+        binding.mainActivityRecyclerview.adapter = adapter
     }
-
-    private fun showErrorScreen(message: String?) {
-        showViewError()
-        vb.errorTextview.text = message ?: getString(R.string.undefined_error)
-        vb.reloadButton.setOnClickListener { viewModel.getData("Error") }
-    }
-
-    private fun showViewSuccess() {
-        vb.successLinearLayout.visibility = VISIBLE
-        vb.loadingFrameLayout.visibility = GONE
-        vb.errorLinearLayout.visibility = GONE
-    }
-
-    private fun showViewLoading() {
-        vb.successLinearLayout.visibility = GONE
-        vb.loadingFrameLayout.visibility = VISIBLE
-        vb.errorLinearLayout.visibility = GONE
-    }
-
-    private fun showViewError() {
-        vb.successLinearLayout.visibility = GONE
-        vb.loadingFrameLayout.visibility = GONE
-        vb.errorLinearLayout.visibility = VISIBLE
-    }
-
-    fun convertMeaningsToString(meanings: List<Meanings>): String {
-        var meaningsSeparatedByComma = String()
-        for ((index, meaning) in meanings.withIndex()) {
-            meaningsSeparatedByComma += if (index + 1 != meanings.size) {
-                String.format("%s%s", meaning.translation?.text, ", ")
-            } else {
-                meaning.translation?.text
-            }
-        }
-        return meaningsSeparatedByComma
-    }
-
-
-    companion object {
-        private const val BOTTOM_SHEET_FRAGMENT_DIALOG_TAG =
-            "74a54328-5d62-46bf-ab6b-cbf5fgt0-092395"
-    }
-
 }

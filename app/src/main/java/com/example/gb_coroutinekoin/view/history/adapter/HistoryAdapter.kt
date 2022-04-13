@@ -1,15 +1,15 @@
-package com.example.gb_coroutinekoin.view.main.adapter
+package com.example.gb_coroutinekoin.view.history.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gb_coroutinekoin.R
 import com.example.gb_coroutinekoin.model.data.DataModel
 
-class MainAdapter(private var onListItemClickListener: OnListItemClickListener) :
-    RecyclerView.Adapter<MainAdapter.RecyclerItemViewHolder>() {
+class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.RecyclerItemViewHolder>() {
 
     private var data: List<DataModel> = arrayListOf()
 
@@ -21,7 +21,7 @@ class MainAdapter(private var onListItemClickListener: OnListItemClickListener) 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerItemViewHolder {
         return RecyclerItemViewHolder(
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.activity_main_recyclerview_item, parent, false) as View
+                .inflate(R.layout.activity_history_recycler_item, parent, false) as View
         )
     }
 
@@ -37,18 +37,13 @@ class MainAdapter(private var onListItemClickListener: OnListItemClickListener) 
 
         fun bind(data: DataModel) {
             if (layoutPosition != RecyclerView.NO_POSITION) {
-                itemView.findViewById<TextView>(R.id.header_textview_recycler_item).text = data.text
-                itemView.findViewById<TextView>(R.id.transcription_textview_recycler_item).text = ""
-                itemView.setOnClickListener { openInNewWindow(data) }
+                itemView.findViewById<TextView>(R.id.header_history_textview_recycler_item).text =
+                    data.text
+                itemView.setOnClickListener {
+                    Toast.makeText(itemView.context, "on click: ${data.text}", Toast.LENGTH_SHORT)
+                        .show()
+                }
             }
         }
-    }
-
-    private fun openInNewWindow(listItemData: DataModel) {
-        onListItemClickListener.onItemClick(listItemData)
-    }
-
-    interface OnListItemClickListener {
-        fun onItemClick(data: DataModel)
     }
 }
