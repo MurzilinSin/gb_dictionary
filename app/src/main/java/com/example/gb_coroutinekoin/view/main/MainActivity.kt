@@ -5,24 +5,22 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import com.example.core.BaseActivity
 import com.example.gb_coroutinekoin.R
 import com.example.gb_coroutinekoin.databinding.ActivityMainBinding
-import com.example.gb_coroutinekoin.model.data.AppState
-import com.example.gb_coroutinekoin.model.data.DataModel
 import com.example.gb_coroutinekoin.util.convertMeaningsToString
-import com.example.gb_coroutinekoin.util.isOnline
-import com.example.gb_coroutinekoin.view.base.BaseActivity
 import com.example.gb_coroutinekoin.view.description.DescriptionActivity
-import com.example.gb_coroutinekoin.view.history.HistoryActivity
 import com.example.gb_coroutinekoin.view.main.adapter.MainAdapter
 import com.example.gb_coroutinekoin.view.search.SearchDialogFragment
 import com.example.gb_coroutinekoin.viewmodels.MainViewModel
+import com.example.historyscreen.history.HistoryActivity
+import com.example.model.AppState
+import com.example.util.isOnline
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
-
 
 private const val BOTTOM_SHEET_FRAGMENT_DIALOG_TAG = "74a54328-5d62-46bf-ab6b-cbf5fgt0-092395"
 
@@ -39,13 +37,13 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
         }
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
-            override fun onItemClick(data: DataModel) {
+            override fun onItemClick(data: com.example.model.DataModel) {
                 startActivity(
                     DescriptionActivity.getIntent(
                         this@MainActivity,
                         data.text!!,
                         convertMeaningsToString(data.meanings!!),
-                        data.meanings[0].imageUrl
+                        data.meanings!![0].imageUrl
                     )
                 )
             }
@@ -75,7 +73,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
         initViews()
     }
 
-    override fun setDataToAdapter(data: List<DataModel>) {
+    override fun setDataToAdapter(data: List<com.example.model.DataModel>) {
         adapter.setData(data)
     }
 
