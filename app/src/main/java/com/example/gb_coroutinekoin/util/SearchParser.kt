@@ -1,11 +1,10 @@
 package com.example.gb_coroutinekoin.util
 
-import com.example.gb_coroutinekoin.model.data.AppState
-import com.example.gb_coroutinekoin.model.data.DataModel
-import com.example.gb_coroutinekoin.model.data.HistoryEntity
-import com.example.gb_coroutinekoin.model.data.Meanings
+import com.example.model.AppState
+import com.example.model.DataModel
+import com.example.model.Meanings
+import com.example.repo.room.db.HistoryEntity
 import java.util.*
-import kotlin.collections.ArrayList
 
 fun parseOnlineSearchResults(appState: AppState): AppState {
     return AppState.Success(mapResult(appState, true))
@@ -33,7 +32,8 @@ private fun getSuccessResultData(
     isOnline: Boolean,
     newDataModels: ArrayList<DataModel>
 ) {
-    val dataModels: List<DataModel> = appState.data as List<DataModel>
+    val dataModels: List<DataModel> =
+        appState.data as List<DataModel>
     if (dataModels.isNotEmpty()) {
         if (isOnline) {
             for (searchResult in dataModels) {
@@ -53,11 +53,14 @@ private fun getSuccessResultData(
     }
 }
 
-private fun parseOnlineResult(dataModel: DataModel, newDataModels: ArrayList<DataModel>) {
+private fun parseOnlineResult(
+    dataModel: DataModel,
+    newDataModels: ArrayList<DataModel>
+) {
     if (!dataModel.text.isNullOrBlank() && !dataModel.meanings.isNullOrEmpty()) {
         val newMeanings = arrayListOf<Meanings>()
-        for (meaning in dataModel.meanings) {
-            if (meaning.translation != null && !meaning.translation.text.isNullOrBlank()) {
+        for (meaning in dataModel.meanings!!) {
+            if (meaning.translation != null && !meaning.translation!!.text.isNullOrBlank()) {
                 newMeanings.add(Meanings(meaning.translation, meaning.imageUrl))
             }
         }
@@ -77,7 +80,7 @@ fun mapHistoryEntityToSearchResult(list: List<HistoryEntity>): List<DataModel> {
     val searchResult = ArrayList<DataModel>()
     if (!list.isNullOrEmpty()) {
         for (entity in list) {
-            searchResult.add(DataModel(entity.word, null))
+            searchResult.add(DataModel(entity.word, null, null))
         }
     }
     return searchResult
