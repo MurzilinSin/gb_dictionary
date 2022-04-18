@@ -3,10 +3,8 @@ package com.example.core
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import com.example.core.databinding.LayoutLoadBinding
 import com.example.core.viewModel.Interactor
-import com.example.gb_coroutinekoin.view.AlertDialogFragment
 import com.example.model.AppState
 import com.example.model.DataModel
 import com.example.util.isOnline

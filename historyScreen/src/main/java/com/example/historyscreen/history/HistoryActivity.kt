@@ -14,14 +14,13 @@ import org.koin.android.ext.android.inject
 
 class HistoryActivity : BaseActivity<AppState, HistoryInteractor>() {
 
-    private lateinit var binding: ActivityHistoryBinding
     private val viewModel: HistoryViewModel by inject()
     private val adapter: HistoryAdapter by lazy { HistoryAdapter() }
+    private val recycler viewById<RecyclerView>(R.id.history_activity_recyclerview)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityHistoryBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+
 
         CoroutineScope(Dispatchers.Main).launch {
             viewModel.state.collectLatest { appState ->
@@ -42,6 +41,6 @@ class HistoryActivity : BaseActivity<AppState, HistoryInteractor>() {
 
 
     private fun initViews() {
-        binding.historyActivityRecyclerview.adapter = adapter
+        recycler.adapter = adapter
     }
 }

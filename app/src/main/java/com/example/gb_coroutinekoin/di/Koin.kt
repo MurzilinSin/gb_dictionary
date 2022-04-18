@@ -4,8 +4,6 @@ import android.app.Application
 import androidx.room.Room
 import com.example.gb_coroutinekoin.R
 import com.example.gb_coroutinekoin.view.main.MainInteractor
-import com.example.historyscreen.history.HistoryViewModel
-import com.example.gb_coroutinekoin.viewmodels.MainViewModel
 import com.example.historyscreen.history.HistoryInteractor
 import com.example.model.DataModel
 import com.example.repo.repo.Repository
@@ -20,10 +18,10 @@ import org.koin.core.context.GlobalContext.startKoin
 import org.koin.dsl.module
 
 val viewModel = module {
-    factory {
-        MainViewModel(get())
+    scope(named<MainActivity>()) {
+        scoped { MainInteractor(get(), get()) }
+        viewModel { MainViewModel(get()) }
     }
-
 }
 val dataSourceModule = module {
     single<Repository<List<DataModel>>> {
@@ -57,8 +55,10 @@ fun dataBaseModule(app: Application) = module {
 }
 
 val historyScreen = module {
-    factory { HistoryViewModel(get()) }
-    factory { HistoryInteractor(get(), get()) }
+    scope(named<HistoryActivity>()) {
+        scoped { HistoryInteractor(get(), get()) }
+        viewModel { HistoryViewModel(get()) }
+    }
 }
 
 

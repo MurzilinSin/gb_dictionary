@@ -12,7 +12,7 @@
         <entry key="..\:/Users/Murzilka/AndroidStudioProjects/gb_coroutineKoin/app/src/main/res/layout/activity_history_recycler_item.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Murzilka/AndroidStudioProjects/gb_coroutineKoin/app/src/main/res/layout/activity_main.xml" value="0.5" />
         <entry key="..\:/Users/Murzilka/AndroidStudioProjects/gb_coroutineKoin/app/src/main/res/layout/activity_main_recyclerview_item.xml" value="0.25" />
-        <entry key="..\:/Users/Murzilka/AndroidStudioProjects/gb_coroutineKoin/app/src/main/res/layout/dialog_search.xml" value="0.358695652173913" />
+        <entry key="..\:/Users/Murzilka/AndroidStudioProjects/gb_coroutineKoin/app/src/main/res/layout/dialog_search.xml" value="0.1" />
         <entry key="..\:/Users/Murzilka/AndroidStudioProjects/gb_coroutineKoin/app/src/main/res/layout/fragment_description.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Murzilka/AndroidStudioProjects/gb_coroutineKoin/app/src/main/res/layout/layout_load.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Murzilka/AndroidStudioProjects/gb_coroutineKoin/app/src/main/res/layout/list_translation.xml" value="0.358695652173913" />
@@ -29,5 +29,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="SuppressABINotification">
+    <option name="modulesWithSuppressedNotConfigured">
+      <set>
+        <option value="gb_coroutineKoin.app" />
+      </set>
+    </option>
   </component>
 </project>
