@@ -11,6 +11,11 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:windowSplashScreenBackground">@color/color_error</item>
+        <item
+            name="android:windowSplashScreenAnimatedIcon">@drawable/ic_android</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/color_gray</item>
+        <item name="android:windowSplashScreenBrandingImage">@drawable/ic_apple</item>
         <!-- Customize your theme here. -->
     </style>
 </resources>

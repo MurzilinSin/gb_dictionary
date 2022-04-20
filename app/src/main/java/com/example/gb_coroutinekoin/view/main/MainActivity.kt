@@ -1,28 +1,31 @@
 package com.example.gb_coroutinekoin.view.main
 
+import android.animation.ObjectAnimator
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewTreeObserver
+import android.view.animation.AnticipateInterpolator
+import com.example.core.BaseActivity
 import com.example.gb_coroutinekoin.R
 import com.example.gb_coroutinekoin.databinding.ActivityMainBinding
-import com.example.gb_coroutinekoin.model.data.AppState
-import com.example.gb_coroutinekoin.model.data.DataModel
 import com.example.gb_coroutinekoin.util.convertMeaningsToString
-import com.example.gb_coroutinekoin.util.isOnline
-import com.example.gb_coroutinekoin.view.base.BaseActivity
 import com.example.gb_coroutinekoin.view.description.DescriptionActivity
-import com.example.gb_coroutinekoin.view.history.HistoryActivity
 import com.example.gb_coroutinekoin.view.main.adapter.MainAdapter
 import com.example.gb_coroutinekoin.view.search.SearchDialogFragment
 import com.example.gb_coroutinekoin.viewmodels.MainViewModel
+import com.example.historyscreen.history.HistoryActivity
+import com.example.model.AppState
+import com.example.util.isOnline
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
-
 
 private const val BOTTOM_SHEET_FRAGMENT_DIALOG_TAG = "74a54328-5d62-46bf-ab6b-cbf5fgt0-092395"
 
@@ -31,6 +34,8 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModel()
     private val adapter: MainAdapter by lazy { MainAdapter(onListItemClickListener) }
+    private val mainActivityRecyclerview by viewById<RecyclerView>(R.id.main_activity_recyclerview)
+    private val searchFAB by viewById<FloatingActionButton>(R.id.search_fab)
     private val fabClickListener: View.OnClickListener =
         View.OnClickListener {
             val searchDialogFragment = SearchDialogFragment.newInstance()
@@ -39,13 +44,13 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
         }
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
-            override fun onItemClick(data: DataModel) {
+            override fun onItemClick(data: com.example.model.DataModel) {
                 startActivity(
                     DescriptionActivity.getIntent(
                         this@MainActivity,
                         data.text!!,
                         convertMeaningsToString(data.meanings!!),
-                        data.meanings[0].imageUrl
+                        data.meanings!![0].imageUrl
                     )
                 )
             }
@@ -66,7 +71,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        setDefaultSplashScreen()
         CoroutineScope(Dispatchers.Main).launch {
             viewModel.state.collectLatest {
                 it?.let { state -> renderData(state) }
@@ -75,7 +80,7 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
         initViews()
     }
 
-    override fun setDataToAdapter(data: List<DataModel>) {
+    override fun setDataToAdapter(data: List<com.example.model.DataModel>) {
         adapter.setData(data)
     }
 
@@ -95,7 +100,57 @@ class MainActivity : BaseActivity<AppState, MainInteractor>() {
     }
 
     private fun initViews() {
-        binding.searchFab.setOnClickListener(fabClickListener)
-        binding.mainActivityRecyclerview.adapter = adapter
+        searchFAB.setOnClickListener(fabClickListener)
+        mainActivityRecyclerview.adapter = adapter
+    }
+
+    private fun setDefaultSplashScreen() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            setSplashScreenHideAnimation()
+        }
+
+        setSplashScreenDuration()
+    }
+
+    @RequiresApi(31)
+    private fun setSplashScreenHideAnimation() {
+        splashScreen.setOnExitAnimationListener { splashScreenView ->
+            val slideLeft = ObjectAnimator.ofFloat(
+                splashScreenView,
+                View.TRANSLATION_X,
+                0f,
+                -splashScreenView.height.toFloat()
+            )
+            slideLeft.interpolator = AnticipateInterpolator()
+            slideLeft.duration = SLIDE_LEFT_DURATION
+
+            slideLeft.doOnEnd { splashScreenView.remove() }
+            slideLeft.start()
+        }
+    }
+
+    private fun setSplashScreenDuration() {
+        var isHideSplashScreen = false
+
+        object : CountDownTimer(COUNTDOWN_DURATION, COUNTDOWN_INTERVAL) {
+            override fun onTick(millisUntilFinished: Long) {}
+            override fun onFinish() {
+                isHideSplashScreen = true
+            }
+        }.start()
+
+        val content: View = findViewById(android.R.id.content)
+        content.viewTreeObserver.addOnPreDrawListener(
+            object : ViewTreeObserver.OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    return if (isHideSplashScreen) {
+                        content.viewTreeObserver.removeOnPreDrawListener(this)
+                        true
+                    } else {
+                        false
+                    }
+                }
+            }
+        )
     }
 }
