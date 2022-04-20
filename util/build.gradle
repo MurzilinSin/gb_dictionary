@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android'
 
 dependencies {
     implementation Design.appcompat
+    implementation Design.material
 
     //Kotlin
     implementation Kotlin.core
